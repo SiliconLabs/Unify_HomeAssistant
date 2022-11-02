@@ -32,5 +32,8 @@ Unify is based on the Zigbee Cluster Library. The clusters supported in the Unif
 | PowerConfiguration     | Sensor (Battery)      |
 | TemperatureMeasurement | Sensor (Temperature)  |
 | Scene                  | Sensor (Binary)       |
+| ElectricalMeasurement  | Sensor (Power)        |
+| DoorLock               | Lock                  |
+
 
 In addition ZCL NameAndLocation is used to set Name of Home Assistant Devices.

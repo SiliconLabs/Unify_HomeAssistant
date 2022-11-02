@@ -78,6 +78,8 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
                 discovery_info["clusters"].append("temperaturemeasurement")
             if "PowerConfiguration" in endpoint.clusters:
                 discovery_info["clusters"].append("powerconfiguration")
+            if "ElectricalMeasurement" in endpoint.clusters:
+                discovery_info["clusters"].append("electricalmeasurement")
             if discovery_info["clusters"]:
                 hass.async_create_task(discovery.async_load_platform(
                     hass, Platform.SENSOR, DOMAIN, discovery_info, config))

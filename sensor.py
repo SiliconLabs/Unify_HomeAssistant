@@ -1,4 +1,4 @@
-""" 
+"""
 Copyright 2022 Silicon Laboratories, www.silabs.com
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -24,8 +24,10 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.const import (
     DEVICE_CLASS_BATTERY,
     DEVICE_CLASS_TEMPERATURE,
+    DEVICE_CLASS_POWER,
     PERCENTAGE,
     TEMP_CELSIUS,
+    POWER_WATT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -47,6 +49,11 @@ async def async_setup_platform(
             hass, unid, endpoint)
         devices.append(hass.data[DOMAIN][DEVICES][unid]
                        [endpoint]["temperaturemeasurement"])
+    if "electricalmeasurement" in discovery_info["clusters"]:
+        hass.data[DOMAIN][DEVICES][unid][endpoint]["electricalmeasurement"] = UnifyPower(
+            hass, unid, endpoint)
+        devices.append(hass.data[DOMAIN][DEVICES][unid]
+                       [endpoint]["electricalmeasurement"])
     if "powerconfiguration" in discovery_info["clusters"]:
         hass.data[DOMAIN][DEVICES][unid][endpoint]["powerconfiguration"] = UnifyBattery(
             hass, unid, endpoint)
@@ -214,6 +221,65 @@ class UnifyBattery(SensorEntity, BaseUnifyEntity):
     def unique_id(self):
         """Return the device unique id"""
         unique_id = f"battery_{self._unid}_{self._ep}"
+        unique_id.replace("-", "_")
+        return unique_id
+
+    @ property
+    def device_class(self):
+        """Return the class of this device, from component DEVICE_CLASSES."""
+        return self._device_class
+
+    @ property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self._native_value
+
+    @ property
+    def native_unit_of_measurement(self):
+        """Return the unit of measurement of this entity, if any."""
+        return self._native_unit_of_measurement
+
+
+class UnifyPower(SensorEntity, BaseUnifyEntity):
+    """Representation of a Unify Power Sensor."""
+
+    def __init__(self, hass, unid, endpoint):
+        _LOGGER.info("UnifyPower: Init")
+        BaseUnifyEntity.__init__(self, hass, unid, endpoint)
+        self._native_value = 0
+        self._device_class = DEVICE_CLASS_POWER
+        self._native_unit_of_measurement = POWER_WATT
+        self._state_class = "measurement"
+
+    @final
+    async def async_added_to_hass(self):
+        await self.async_subscribe(
+            f"ucl/by-unid/{self._unid}/{self._ep}/ElectricalMeasurement/Attributes/ActivePower/Reported",
+            self._on_message_state)
+
+    def _on_message_state(self, msg: ReceiveMessage):
+        try:
+            parsed_msg = json.loads(msg.payload)
+            _LOGGER.info(
+                "UnifyPower: state changed for %s to %s Payload %s ",
+                self._name,
+                msg.topic,
+                parsed_msg,
+            )
+            # Value from Unify given in DeciWatt, convert to Watt
+            self._native_value = int(parsed_msg["value"]) / 10
+            _LOGGER.info("UnifyPower: state detected %s", self._native_value)
+
+            self.schedule_update_ha_state(False)
+            _LOGGER.info("UnifyPower: HA State updated: %s",
+                         self._native_value)
+        except Exception as err:
+            _LOGGER.info("UnifyPower: Exception on State Update: %s", err)
+
+    @ property
+    def unique_id(self):
+        """Return the device unique id"""
+        unique_id = f"power_{self._unid}_{self._ep}"
         unique_id.replace("-", "_")
         return unique_id
 
