@@ -1,4 +1,4 @@
-""" 
+"""
 Copyright 2022 Silicon Laboratories, www.silabs.com
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -65,7 +65,7 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
                     pass
             # sensors
             discovery_info["clusters"] = []
-            if "Scenes" in endpoint.clusters:
+            if "Scenes" in endpoint.clusters and "RecallScene" in endpoint.clusters["Scenes"].supported_commands:
                 discovery_info["clusters"].append("scenes")
             if "TemperatureMeasurement" in endpoint.clusters:
                 discovery_info["clusters"].append("temperaturemeasurement")
