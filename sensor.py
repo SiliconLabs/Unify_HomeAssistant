@@ -1,4 +1,4 @@
-""" 
+"""
 Copyright 2022 Silicon Laboratories, www.silabs.com
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -63,7 +63,7 @@ class UnifyTemperature(SensorEntity, BaseUnifyEntity):
     """Representation of a Unify Temperature Sensor."""
 
     def __init__(self, hass, unid, endpoint):
-        BaseUnifyEntity.__init__(self, hass, unid, endpoint)
+        BaseUnifyEntity.__init__(self, hass, unid, endpoint, 'temperature')
         _LOGGER.info("UnifyTemperature: Init")
         self._native_value = 0
         self._device_class = DEVICE_CLASS_TEMPERATURE
@@ -82,7 +82,7 @@ class UnifyTemperature(SensorEntity, BaseUnifyEntity):
         temp = int(parsed_msg["value"]) / 100
         _LOGGER.info(
             "UnifyTemperature: state changed for %s to %s Payload %s ",
-            self._name,
+            self.name,
             msg.topic,
             parsed_msg,
         )
@@ -123,7 +123,7 @@ class UnifyScene(SensorEntity, BaseUnifyEntity):
     """Representation of a Unify Scene."""
 
     def __init__(self, hass, unid, endpoint):
-        BaseUnifyEntity.__init__(self, hass, unid, endpoint)
+        BaseUnifyEntity.__init__(self, hass, unid, endpoint, 'scene')
         self._native_value = ""
         self._device_class = ""
         self._native_unit_of_measurement = ""
@@ -139,7 +139,7 @@ class UnifyScene(SensorEntity, BaseUnifyEntity):
         parsed_msg = json.loads(msg.payload)
         _LOGGER.info(
             "UnifyScene: state changed for %s to %s Payload %s ",
-            self._name,
+            self.name,
             msg.topic,
             parsed_msg,
         )
@@ -180,7 +180,7 @@ class UnifyBattery(SensorEntity, BaseUnifyEntity):
 
     def __init__(self, hass, unid, endpoint):
         _LOGGER.info("UnifyBattery: Init")
-        BaseUnifyEntity.__init__(self, hass, unid, endpoint)
+        BaseUnifyEntity.__init__(self, hass, unid, endpoint, 'battery')
         self._native_value = 100
         self._device_class = DEVICE_CLASS_BATTERY
         self._native_unit_of_measurement = PERCENTAGE
@@ -197,7 +197,7 @@ class UnifyBattery(SensorEntity, BaseUnifyEntity):
             parsed_msg = json.loads(msg.payload)
             _LOGGER.info(
                 "UnifyBattery: state changed for %s to %s Payload %s ",
-                self._name,
+                self.name,
                 msg.topic,
                 parsed_msg,
             )

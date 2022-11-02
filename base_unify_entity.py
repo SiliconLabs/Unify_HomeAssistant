@@ -1,4 +1,4 @@
-""" 
+"""
 Copyright 2022 Silicon Laboratories, www.silabs.com
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -144,11 +144,13 @@ class BaseUnifyState(Entity):
 
 class BaseUnifyEntity(BaseUnifySupportedCommands, BaseUnifyState):
     """Encapsulates all the base capabilities of a Unify device"""
+    _attr_has_entity_name: bool = True
 
-    def __init__(self, hass, unid, endpoint):
+    def __init__(self, hass, unid, endpoint, entity_type=""):
         self._hass = hass
         self._unid = unid
         self._ep = endpoint
+        self._entity_type = entity_type
         self.added_device = False
         self._async_mqtt_remove = []
         self._name = hass.data[DOMAIN][NODE_STATE_MONITOR].nodes[self._unid].endpoints[self._ep].name
@@ -157,7 +159,13 @@ class BaseUnifyEntity(BaseUnifySupportedCommands, BaseUnifyState):
     @ property
     def name(self):
         """Return the name of the device."""
-        return self._name or self.unique_id
+        if self._name:
+            if self._entity_type:
+                return self._entity_type + "_" + self._name
+            else:
+                return self._name
+        else:
+            return self.unique_id
 
     @ property
     def force_update(self):

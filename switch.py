@@ -1,4 +1,4 @@
-""" 
+"""
 Copyright 2022 Silicon Laboratories, www.silabs.com
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -48,8 +48,6 @@ async def async_setup_platform(
 
 class UnifyOnOff(SwitchEntity, BaseUnifyEntity):
     """Representation of a Unify Switch."""
-    _attr_has_entity_name = True
-    _attr_name = None
 
     def __init__(self, hass, unid, endpoint):
         self._is_on = False
