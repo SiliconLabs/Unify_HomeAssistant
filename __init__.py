@@ -1,4 +1,4 @@
-""" 
+"""
 Copyright 2022 Silicon Laboratories, www.silabs.com
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -55,6 +55,13 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
                 hass.async_create_task(discovery.async_load_platform(
                     hass, Platform.LIGHT, DOMAIN, discovery_info, config))
                 pass
+            elif "DoorLock" in endpoint.clusters:
+                if endpoint.clusters["DoorLock"].supported_generated_commands:
+                    pass
+                if endpoint.clusters["DoorLock"].supported_commands:
+                    hass.async_create_task(discovery.async_load_platform(
+                        hass, Platform.LOCK, DOMAIN, discovery_info, config))
+                    pass
             elif "OnOff" in endpoint.clusters:
                 if endpoint.clusters["OnOff"].supported_generated_commands:
                     # TODO: Add binary sensor
