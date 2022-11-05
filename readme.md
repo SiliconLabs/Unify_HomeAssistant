@@ -18,18 +18,24 @@ To enable the Unify bridge the components requirements must be met:
 
 ## Installation
 
+Two installation methods are available, through HACS or manually.
+
 ### HACS (recommended)
+
 Currently only custom repository is supported.
 To install:
+
 * Add [https://github.com/SiliconLabs/Unify_HomeAssistant](https://github.com/SiliconLabs/Unify_HomeAssistant) as a custom repository in the "Integration" category
 * Find the Unify integration and in install it by clicking "Download"
 * Restart Home Assistant
 
 In Home Assistant Integration section (Settings->Devices & Services->Integration):
+
 * Add MQTT Integration if not already installed and make sure it points to the Unify MQTT server
 * Unify Integration should be automatically discovered - click Configure
 
 ### Manual installation
+
 * Copy `this` folder to `custom_components` on your HA installation. If custom_components does not exist, create it in the root of the HA config folder, ie. same level as the `configuration.yaml` file.
 * In the Home Assistant UI add Unify integration or MQTT intrgration and setup the MQTT integration to use the Unify MQTT server.
 

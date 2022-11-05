@@ -168,8 +168,9 @@ class UnifyLight(LightEntity, BaseUnifyEntity):
 
     async def _on_message_supported_commands_color_control(self, message: ReceiveMessage):
         self._supported_commands["colorcontrol"] = message.payload
-        _LOGGER.info("UnifyLight: ColorControl %s", self._supported_commands)
-        self._supported_color_modes.add(ColorMode.HS)
+        if "MoveToHueAndSaturation" in self._supported_commands:
+            _LOGGER.info("UnifyLight: ColorControl %s supports MoveToHueAndSaturation", self._supported_commands)
+            self._supported_color_modes.add(ColorMode.HS)
 
     async def _on_message_supported_commands_level(self, message: ReceiveMessage):
         self._supported_commands["level"] = message.payload
