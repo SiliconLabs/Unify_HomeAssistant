@@ -23,7 +23,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import discovery
 
 _LOGGER = logging.getLogger(__name__)
-PLATFORMS = [Platform.SWITCH, Platform.LIGHT, Platform.SENSOR, Platform.LOCK]
+PLATFORMS = [Platform.SWITCH, Platform.LIGHT, Platform.SENSOR, Platform.LOCK, Platform.BINARY_SENSOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
@@ -51,6 +51,15 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
                 hass.async_create_task(discovery.async_load_platform(
                     hass, Platform.LIGHT, DOMAIN, discovery_info, config))
                 pass
+            elif "OccupancySensing" in endpoint.clusters:
+                if "OnOff" in endpoint.clusters:
+                    if endpoint.clusters["OnOff"].supported_generated_commands:
+                        hass.async_create_task(discovery.async_load_platform(
+                            hass, Platform.BINARY_SENSOR, DOMAIN, discovery_info, config))
+                        pass
+                hass.async_create_task(discovery.async_load_platform(
+                    hass, Platform.BINARY_SENSOR, DOMAIN, discovery_info, config))
+                pass
             elif "Level" in endpoint.clusters and endpoint.clusters["Level"].supported_commands:
                 hass.async_create_task(discovery.async_load_platform(
                     hass, Platform.LIGHT, DOMAIN, discovery_info, config))
@@ -64,7 +73,7 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
                     pass
             elif "OnOff" in endpoint.clusters:
                 if endpoint.clusters["OnOff"].supported_generated_commands:
-                    # TODO: Add binary sensor
+                    #
                     pass
                 if endpoint.clusters["OnOff"].supported_commands:
                     hass.async_create_task(discovery.async_load_platform(
@@ -72,7 +81,7 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
                     pass
             # sensors
             discovery_info["clusters"] = []
-            if "Scenes" in endpoint.clusters and "RecallScene" in endpoint.clusters["Scenes"].supported_commands:
+            if "Scenes" in endpoint.clusters and "RecallScene" in endpoint.clusters["Scenes"].supported_generated_commands:
                 discovery_info["clusters"].append("scenes")
             if "TemperatureMeasurement" in endpoint.clusters:
                 discovery_info["clusters"].append("temperaturemeasurement")
