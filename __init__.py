@@ -46,12 +46,12 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
         for endpoint in node.endpoints.values():
             discovery_info = {"unid": node.unid, "endpoint": endpoint.value}
             _LOGGER.info(
-                f"Endpoint: {endpoint.value} clusters {endpoint.clusters.keys()}")
+                f"UNID: {node.unid} Endpoint: {endpoint.value} clusters {endpoint.clusters.keys()}")
             if "ColorControl" in endpoint.clusters:
                 hass.async_create_task(discovery.async_load_platform(
                     hass, Platform.LIGHT, DOMAIN, discovery_info, config))
                 pass
-            elif "OccupancySensing" in endpoint.clusters:
+            if "OccupancySensing" in endpoint.clusters:
                 if "OnOff" in endpoint.clusters:
                     if endpoint.clusters["OnOff"].supported_generated_commands:
                         hass.async_create_task(discovery.async_load_platform(
@@ -60,18 +60,18 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
                 hass.async_create_task(discovery.async_load_platform(
                     hass, Platform.BINARY_SENSOR, DOMAIN, discovery_info, config))
                 pass
-            elif "Level" in endpoint.clusters and endpoint.clusters["Level"].supported_commands:
+            if "Level" in endpoint.clusters and endpoint.clusters["Level"].supported_commands:
                 hass.async_create_task(discovery.async_load_platform(
                     hass, Platform.LIGHT, DOMAIN, discovery_info, config))
                 pass
-            elif "DoorLock" in endpoint.clusters:
+            if "DoorLock" in endpoint.clusters:
                 if endpoint.clusters["DoorLock"].supported_generated_commands:
                     pass
                 if endpoint.clusters["DoorLock"].supported_commands:
                     hass.async_create_task(discovery.async_load_platform(
                         hass, Platform.LOCK, DOMAIN, discovery_info, config))
                     pass
-            elif "OnOff" in endpoint.clusters:
+            if "OnOff" in endpoint.clusters:
                 if endpoint.clusters["OnOff"].supported_generated_commands:
                     #
                     pass
