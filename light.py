@@ -58,7 +58,7 @@ class UnifyLight(LightEntity, BaseUnifyEntity):
     def __init__(self, hass, unid, endpoint):
         BaseUnifyEntity.__init__(self, hass, unid, endpoint)
         self._supported_color_modes = set()
-        self._attr_hs_color = None #tuple()
+        self._attr_hs_color = None  # tuple()
         self._effect_list = {}
         self._effect = None
         self._is_on = False
@@ -110,7 +110,6 @@ class UnifyLight(LightEntity, BaseUnifyEntity):
             return ColorMode.ONOFF
         return ColorMode.UNKNOWN
 
-
     @property
     def supported_color_modes(self):
         """Flag supported color modes."""
@@ -128,7 +127,7 @@ class UnifyLight(LightEntity, BaseUnifyEntity):
 
     async def _on_message_change_hue(self, message: ReceiveMessage):
         try:
-            _LOGGER.info("UnifyLight: Hue state changed for %s to %s with payload %s",
+            _LOGGER.debug("UnifyLight: Hue state changed for %s to %s with payload %s",
                           self.name, message.topic, message.payload)
             msg = json.loads(message.payload)
             #new_hue = msg["value"]
@@ -140,8 +139,8 @@ class UnifyLight(LightEntity, BaseUnifyEntity):
             return
 
     async def _on_message_change_saturation(self, message: ReceiveMessage):
-        _LOGGER.info("UnifyLight: Saturation state changed for %s to %s with payload %s ",
-                   self.name, message.topic, message.payload)
+        _LOGGER.debug("UnifyLight: Saturation state changed for %s to %s with payload %s ",
+                      self.name, message.topic, message.payload)
         try:
             msg = json.loads(message.payload)
             #new_sat = msg["value"]
@@ -151,8 +150,6 @@ class UnifyLight(LightEntity, BaseUnifyEntity):
             return
         except ValueError:
             return
-
-
 
     async def _on_message_change_level(self, message: ReceiveMessage):
         _LOGGER.debug("UnifyLight: Level state changed for %s to %s ",
@@ -169,7 +166,7 @@ class UnifyLight(LightEntity, BaseUnifyEntity):
     async def _on_message_supported_commands_color_control(self, message: ReceiveMessage):
         self._supported_commands["colorcontrol"] = message.payload
         if "MoveToHueAndSaturation" in self._supported_commands["colorcontrol"]:
-            _LOGGER.info("UnifyLight: ColorControl %s supports MoveToHueAndSaturation", self._supported_commands)
+            _LOGGER.debug("UnifyLight: ColorControl %s supports MoveToHueAndSaturation", self._supported_commands)
             self._supported_color_modes.add(ColorMode.HS)
 
     async def _on_message_supported_commands_level(self, message: ReceiveMessage):
@@ -206,7 +203,7 @@ class UnifyLight(LightEntity, BaseUnifyEntity):
                 topic = f"ucl/by-unid/{self._unid}/{self._ep}/ColorControl/Commands/MoveToHueAndSaturation"
 
                 hue, sat = self._attr_hs_color
-                hue = (1-(360-hue)/360)*255
+                hue = (1 - (360 - hue) / 360) * 255
                 sat = sat / 100 * 255
                 payload = {
                     "Hue": int(hue),
@@ -220,7 +217,7 @@ class UnifyLight(LightEntity, BaseUnifyEntity):
                     }
                 }
 
-                _LOGGER.info("UnifyLight: MoveToHueAndSaturation %s %s", topic, payload)
+                _LOGGER.debug("UnifyLight: MoveToHueAndSaturation %s %s", topic, payload)
                 await self.async_send_message(topic, json.dumps(payload), False)
                 return
         if brightness := kwargs.get(ATTR_BRIGHTNESS):

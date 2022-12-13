@@ -47,39 +47,32 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
             discovery_info = {"unid": node.unid, "endpoint": endpoint.value}
             _LOGGER.info(
                 f"UNID: {node.unid} Endpoint: {endpoint.value} clusters {endpoint.clusters.keys()}")
-            if "ColorControl" in endpoint.clusters:
+            # Actuators
+            # Light
+            if "ColorControl" in endpoint.clusters and endpoint.clusters["ColorControl"].supported_commands:
                 hass.async_create_task(discovery.async_load_platform(
                     hass, Platform.LIGHT, DOMAIN, discovery_info, config))
-                pass
+            elif "Level" in endpoint.clusters and endpoint.clusters["Level"].supported_commands:
+                hass.async_create_task(discovery.async_load_platform(
+                    hass, Platform.LIGHT, DOMAIN, discovery_info, config))
+            elif "OnOff" in endpoint.clusters and endpoint.clusters["OnOff"].supported_commands:
+                hass.async_create_task(discovery.async_load_platform(
+                    hass, Platform.SWITCH, DOMAIN, discovery_info, config))
+
+            # DoorLock
+            if "DoorLock" in endpoint.clusters and endpoint.clusters["DoorLock"].supported_commands:
+                hass.async_create_task(discovery.async_load_platform(
+                    hass, Platform.LOCK, DOMAIN, discovery_info, config))
+
+            # Binary Sensors
             if "OccupancySensing" in endpoint.clusters:
-                if "OnOff" in endpoint.clusters:
-                    if endpoint.clusters["OnOff"].supported_generated_commands:
-                        hass.async_create_task(discovery.async_load_platform(
-                            hass, Platform.BINARY_SENSOR, DOMAIN, discovery_info, config))
-                        pass
                 hass.async_create_task(discovery.async_load_platform(
                     hass, Platform.BINARY_SENSOR, DOMAIN, discovery_info, config))
-                pass
-            if "Level" in endpoint.clusters and endpoint.clusters["Level"].supported_commands:
+            if "OnOff" in endpoint.clusters and endpoint.clusters["OnOff"].supported_generated_commands:
                 hass.async_create_task(discovery.async_load_platform(
-                    hass, Platform.LIGHT, DOMAIN, discovery_info, config))
-                pass
-            if "DoorLock" in endpoint.clusters:
-                if endpoint.clusters["DoorLock"].supported_generated_commands:
-                    pass
-                if endpoint.clusters["DoorLock"].supported_commands:
-                    hass.async_create_task(discovery.async_load_platform(
-                        hass, Platform.LOCK, DOMAIN, discovery_info, config))
-                    pass
-            if "OnOff" in endpoint.clusters:
-                if endpoint.clusters["OnOff"].supported_generated_commands:
-                    #
-                    pass
-                if endpoint.clusters["OnOff"].supported_commands:
-                    hass.async_create_task(discovery.async_load_platform(
-                        hass, Platform.SWITCH, DOMAIN, discovery_info, config))
-                    pass
-            # sensors
+                    hass, Platform.BINARY_SENSOR, DOMAIN, discovery_info, config))
+
+            # Other Sensors
             discovery_info["clusters"] = []
             if "Scenes" in endpoint.clusters and "RecallScene" in endpoint.clusters["Scenes"].supported_generated_commands:
                 discovery_info["clusters"].append("scenes")
