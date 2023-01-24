@@ -1,14 +1,9 @@
 """
 Copyright 2022 Silicon Laboratories, www.silabs.com
-
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-
 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
@@ -18,7 +13,7 @@ import json
 from typing import final
 
 # Integration components
-from .base_unify_entity import BaseUnifyEntity, setup_device_data_structure
+from .base_unify_entity import BaseUnifyEntity
 from .const import DOMAIN, DEVICES
 
 # HA packages
@@ -39,7 +34,6 @@ async def async_setup_platform(
         discovery_info=None):
     unid = discovery_info["unid"]
     endpoint = discovery_info["endpoint"]
-    setup_device_data_structure(unid, endpoint, hass.data[DOMAIN][DEVICES])
     hass.data[DOMAIN][DEVICES][unid][endpoint]["binary_sensor"] = UnifyOccupancySensing(
         hass, unid, endpoint)
     device = hass.data[DOMAIN][DEVICES][unid][endpoint]["binary_sensor"]
@@ -91,7 +85,6 @@ class UnifyOccupancySensing(BinarySensorEntity, BaseUnifyEntity):
             self.async_schedule_update_ha_state(False)
         except Exception as err:
             _LOGGER.error("BinarySensor: Exception on State Update: %s", err)
-
 
     async def _on_message_state(self, message: ReceiveMessage):
         _LOGGER.debug("BinarySensor: state changed for %s to %s ",

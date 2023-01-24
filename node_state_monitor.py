@@ -1,14 +1,9 @@
-""" 
+"""
 Copyright 2022 Silicon Laboratories, www.silabs.com
-
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-
 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
@@ -234,7 +229,7 @@ class NodeStateMonitor():
         old_state = node.state
         node.state = message.payload
 
-        if not node.added and self._async_on_node_added and not hasattr(node, 'node_added_timer'):
+        if not node.added and self._async_on_node_added:
             async def timeout_callback():
                 if time.time() - node.last_update > 1:
                     node.node_added_timer = None
@@ -244,7 +239,8 @@ class NodeStateMonitor():
                 else:
                     _LOGGER.info("Starting node_added_timer")
                     node.node_added_timer = Timer(1, timeout_callback)
-            await timeout_callback()
+            if not hasattr(node, 'node_added_timer') and node.state == "Online functional":
+                await timeout_callback()
         else:
             if self._async_on_state_changed:
                 await self._async_on_state_changed(node, old_state, node.state)

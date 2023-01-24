@@ -26,15 +26,28 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORMS = [Platform.SWITCH, Platform.LIGHT, Platform.SENSOR, Platform.LOCK, Platform.BINARY_SENSOR]
 
 
+def setup_device_data_structure(node: Node, devices: dict):
+    if node.unid not in devices:
+        devices[node.unid] = {}
+
+    for endpoint in node.endpoints:
+        if endpoint not in devices[node.unid]:
+            devices[node.unid][endpoint] = {}
+
+    return devices
+
+
 async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
     """Set up uhab from a config entry."""
     hass.data[DOMAIN] = {}
     hass.data[DOMAIN][DEVICES] = {}
 
     async def async_on_state_changed(node: Node, old_state: str, new_state: str):
+        setup_device_data_structure(node, hass.data[DOMAIN][DEVICES])
         if old_state != new_state:
             try:
-                for endpoint in hass.data[DOMAIN][DEVICES][node.unid].value():
+                _tmp_node = hass.data[DOMAIN][DEVICES][node.unid]
+                for endpoint in _tmp_node.values():
                     for entity in endpoint.values():
                         entity.async_schedule_update_ha_state(
                             force_refresh=True)
@@ -42,7 +55,8 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
                 _LOGGER.warning("Failed to set available")
 
     async def async_on_node_added(node):
-        #_LOGGER.info(f"Node added: {node}")
+        # _LOGGER.info(f"Node added: {node}")
+        setup_device_data_structure(node, hass.data[DOMAIN][DEVICES])
         for endpoint in node.endpoints.values():
             discovery_info = {"unid": node.unid, "endpoint": endpoint.value}
             _LOGGER.info(

@@ -1,14 +1,9 @@
 """
 Copyright 2022 Silicon Laboratories, www.silabs.com
-
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-
 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
@@ -32,7 +27,7 @@ from homeassistant.components import mqtt
 from homeassistant.components.mqtt.models import ReceiveMessage
 
 # Integration components
-from .base_unify_entity import BaseUnifyEntity, setup_device_data_structure
+from .base_unify_entity import BaseUnifyEntity
 from .const import DOMAIN, DEVICES
 
 _LOGGER = logging.getLogger(__name__)
@@ -45,7 +40,6 @@ async def async_setup_platform(
         discovery_info=None):
     unid = discovery_info["unid"]
     endpoint = discovery_info["endpoint"]
-    setup_device_data_structure(unid, endpoint, hass.data[DOMAIN][DEVICES])
     hass.data[DOMAIN][DEVICES][unid][endpoint]["light"] = UnifyLight(
         hass, unid, endpoint)
     device = hass.data[DOMAIN][DEVICES][unid][endpoint]["light"]
@@ -74,7 +68,6 @@ class UnifyLight(LightEntity, BaseUnifyEntity):
         await self.async_subscribe(f"ucl/by-unid/{self._unid}/{self._ep}/Level/SupportedCommands", self._on_message_supported_commands_level)
         await self.async_subscribe(f"ucl/by-unid/{self._unid}/{self._ep}/OnOff/Attributes/OnOff/Reported", self._on_message_on_off)
         await self.async_subscribe(f"ucl/by-unid/{self._unid}/{self._ep}/OnOff/SupportedCommands", self._on_message_supported_commands_on_off)
-
         return self
 
     @ property
@@ -116,11 +109,6 @@ class UnifyLight(LightEntity, BaseUnifyEntity):
         return self._supported_color_modes
 
     @property
-    def brightness(self):
-        """Return the brightness of this light between 0..255."""
-        return self._attr_brightness
-
-    @property
     def is_on(self):
         """Return true if sensor is on."""
         return self._is_on
@@ -130,9 +118,9 @@ class UnifyLight(LightEntity, BaseUnifyEntity):
             _LOGGER.debug("UnifyLight: Hue state changed for %s to %s with payload %s",
                           self.name, message.topic, message.payload)
             msg = json.loads(message.payload)
-            #new_hue = msg["value"]
-            #hue, sat = self._attr_hs_color
-            #self._attr_hs_color = (new_hue, sat)
+            # new_hue = msg["value"]
+            # hue, sat = self._attr_hs_color
+            # self._attr_hs_color = (new_hue, sat)
         except json.decoder.JSONDecodeError:
             return
         except ValueError:
@@ -143,9 +131,9 @@ class UnifyLight(LightEntity, BaseUnifyEntity):
                       self.name, message.topic, message.payload)
         try:
             msg = json.loads(message.payload)
-            #new_sat = msg["value"]
-            #hue, sat = self._attr_hs_color
-            #self._attr_hs_color = (hue, new_sat)
+            # new_sat = msg["value"]
+            # hue, sat = self._attr_hs_color
+            # self._attr_hs_color = (hue, new_sat)
         except json.decoder.JSONDecodeError:
             return
         except ValueError:
@@ -162,6 +150,10 @@ class UnifyLight(LightEntity, BaseUnifyEntity):
             return
         except ValueError:
             return
+        try:
+            self.async_schedule_update_ha_state(False)
+        except Exception as err:
+            _LOGGER.error("UnifyLight: Exception on State Update: %s", err)
 
     async def _on_message_supported_commands_color_control(self, message: ReceiveMessage):
         self._supported_commands["colorcontrol"] = message.payload
