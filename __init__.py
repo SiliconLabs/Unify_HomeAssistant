@@ -49,8 +49,15 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
                 _tmp_node = hass.data[DOMAIN][DEVICES][node.unid]
                 for endpoint in _tmp_node.values():
                     for entity in endpoint.values():
-                        entity.async_schedule_update_ha_state(
-                            force_refresh=True)
+                        try:
+                            if new_state != "Online functional":
+                                # HACK: Following is a hack to clear native value, when the scene sensor becomes unavailable
+                                # it should be implemented somewhere else, but don't know where yet
+                                if callable(getattr(entity, "clear_state", None)):
+                                    entity.clear_state()
+                            entity.async_schedule_update_ha_state(force_refresh=True)
+                        except:
+                            pass
             except ValueError:
                 _LOGGER.warning("Failed to set available")
 
