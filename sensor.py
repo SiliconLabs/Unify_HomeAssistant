@@ -78,7 +78,10 @@ class UnifyTemperature(SensorEntity, BaseUnifyEntity):
             self._on_message_state)
 
     def _on_message_state(self, msg: ReceiveMessage):
-        _LOGGER.info("Temp: State change")
+        if not msg.payload:
+            _LOGGER.info("UnifyTemperature: Clearing native value")
+            self._native_value = None
+            return
         parsed_msg = json.loads(msg.payload)
         temp = int(parsed_msg["value"]) / 100
         _LOGGER.info(
@@ -125,7 +128,7 @@ class UnifyScene(SensorEntity, BaseUnifyEntity):
 
     def __init__(self, hass, unid, endpoint):
         BaseUnifyEntity.__init__(self, hass, unid, endpoint, 'scene')
-        self._native_value = ""
+        self._native_value = None
         self._device_class = ""
         self._native_unit_of_measurement = ""
         self._state_class = "measurement"
@@ -137,6 +140,10 @@ class UnifyScene(SensorEntity, BaseUnifyEntity):
             self._on_message_state)
 
     def _on_message_state(self, msg: ReceiveMessage):
+        if not msg.payload:
+            _LOGGER.info("UnifyScene: Clearing native value")
+            self._native_value = None
+            return
         parsed_msg = json.loads(msg.payload)
         _LOGGER.info(
             "UnifyScene: state changed for %s to %s Payload %s ",
@@ -152,6 +159,12 @@ class UnifyScene(SensorEntity, BaseUnifyEntity):
                           self._native_value)
         except Exception as err:
             _LOGGER.warning("UnifyScene: Exception on State Update: %s", err)
+
+    # HACK: Following is a hack to clear native value, when the scene sensor becomes unavailable
+    # it should be implemented somewhere else, but don't know where yet
+    def clear_state(self):
+        _LOGGER.info("UnifyScene: Clearing state")
+        self._native_value = None
 
     @ property
     def unique_id(self):
@@ -194,6 +207,10 @@ class UnifyBattery(SensorEntity, BaseUnifyEntity):
             self._on_message_state)
 
     def _on_message_state(self, msg: ReceiveMessage):
+        if not msg.payload:
+            _LOGGER.info("UnifyBattery: Clearing native value")
+            self._native_value = None
+            return
         try:
             parsed_msg = json.loads(msg.payload)
             _LOGGER.info(
@@ -252,6 +269,10 @@ class UnifyPower(SensorEntity, BaseUnifyEntity):
             self._on_message_state)
 
     def _on_message_state(self, msg: ReceiveMessage):
+        if not msg.payload:
+            _LOGGER.info("UnifyPower: Clearing native value")
+            self._native_value = None
+            return
         try:
             parsed_msg = json.loads(msg.payload)
             _LOGGER.info(
